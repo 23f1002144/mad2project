@@ -359,12 +359,13 @@ export default {
     await this.loadReservations()
   },
   methods: {
-    ...mapActions('reservations', ['fetchUserReservations', 'updateReservationStatus', 'cancelUserReservation']),
+    ...mapActions('parking', ['fetchReservationHistory', 'parkVehicle', 'releaseParking']),
     
     async loadReservations() {
       this.loading = true
       try {
-        this.reservations = await this.fetchUserReservations()
+        const response = await this.fetchReservationHistory({ page: 1, perPage: 100 })
+        this.reservations = response.reservations || []
         this.calculateStats()
       } catch (error) {
         console.error('Error loading reservations:', error)
@@ -390,11 +391,7 @@ export default {
     async startParking(reservation) {
       this.actionLoading = reservation.id
       try {
-        await this.updateReservationStatus({
-          id: reservation.id,
-          status: 'active',
-          parking_timestamp: new Date().toISOString()
-        })
+        await this.parkVehicle(reservation.id)
         
         await this.loadReservations()
         this.$toast?.success('Parking started successfully!')
@@ -410,11 +407,7 @@ export default {
     async endParking(reservation) {
       this.actionLoading = reservation.id
       try {
-        await this.updateReservationStatus({
-          id: reservation.id,
-          status: 'completed',
-          leaving_timestamp: new Date().toISOString()
-        })
+        await this.releaseParking(reservation.id)
         
         await this.loadReservations()
         this.$toast?.success('Parking ended successfully!')
@@ -434,9 +427,9 @@ export default {
       
       this.actionLoading = reservation.id
       try {
-        await this.cancelUserReservation(reservation.id)
-        await this.loadReservations()
-        this.$toast?.success('Reservation cancelled successfully!')
+        // TODO: Implement cancel endpoint in backend
+        console.log('Cancel functionality not yet implemented in backend')
+        this.$toast?.error('Cancel functionality coming soon!')
         
       } catch (error) {
         console.error('Error cancelling reservation:', error)

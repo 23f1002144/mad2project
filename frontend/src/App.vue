@@ -53,39 +53,19 @@
                 Register
               </router-link>
             </li>
+            <!-- User Info Display -->
+            <li class="nav-item" v-if="isAuthenticated">
+              <span class="navbar-text text-light me-3">
+                <i class="fas fa-user me-1"></i>
+                Welcome, {{ currentUser.first_name }}!
+              </span>
+            </li>
             <!-- Direct Logout Button for easier access -->
             <li class="nav-item" v-if="isAuthenticated">
-              <a class="nav-link btn btn-outline-light btn-sm ms-2" href="#" @click="logout" style="border-radius: 20px;">
+              <a class="nav-link btn btn-outline-light btn-sm" href="#" @click="logout" style="border-radius: 20px;">
                 <i class="fas fa-sign-out-alt"></i>
                 Logout
               </a>
-            </li>
-            <li class="nav-item dropdown" v-if="isAuthenticated">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                <i class="fas fa-user"></i>
-                {{ currentUser.first_name }}
-              </a>
-              <ul class="dropdown-menu">
-                <li v-if="isUser">
-                  <router-link class="dropdown-item" to="/profile">
-                    <i class="fas fa-user-edit"></i>
-                    Profile
-                  </router-link>
-                </li>
-                <li v-if="isUser">
-                  <router-link class="dropdown-item" to="/reservations">
-                    <i class="fas fa-history"></i>
-                    My Reservations
-                  </router-link>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                  <a class="dropdown-item" href="#" @click="logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
-                  </a>
-                </li>
-              </ul>
             </li>
           </ul>
         </div>

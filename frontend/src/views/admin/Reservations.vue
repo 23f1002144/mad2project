@@ -434,6 +434,7 @@ export default {
       itemsPerPage: 15,
       reservations: [],
       selectedReservation: null,
+      refreshInterval: null,
       stats: {
         reserved: 0,
         active: 0,
@@ -497,14 +498,29 @@ export default {
     if (this.$route.query.user_id) {
       this.searchQuery = this.$route.query.user_id
     }
+    
+    // Set up auto-refresh every 30 seconds
+    this.refreshInterval = setInterval(() => {
+      if (!this.loading) {
+        this.loadReservations()
+      }
+    }, 30000)
+  },
+  
+  beforeUnmount() {
+    // Clear the refresh interval when component is destroyed
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval)
+    }
   },
   methods: {
-    ...mapActions('admin', ['fetchAllReservations', 'updateReservationStatus', 'cancelReservation']),
+    ...mapActions('admin', ['fetchReservations', 'updateReservationStatus', 'cancelReservation']),
     
     async loadReservations() {
       this.loading = true
       try {
-        this.reservations = await this.fetchAllReservations()
+        const result = await this.fetchReservations({ page: 1, perPage: 1000 })
+        this.reservations = result.reservations
         this.calculateStats()
       } catch (error) {
         console.error('Error loading reservations:', error)

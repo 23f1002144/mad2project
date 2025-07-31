@@ -1,15 +1,33 @@
 <template>
-  <div class="container-fluid mt-4">
-    <!-- Page Header -->
+    <div class="container-fluid py-4">
+    <!-- Success Alert -->
+    <div v-if="showSuccessAlert" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+      <i class="fas fa-check-circle me-2"></i>
+      <strong>Success!</strong> {{ successMessage }}
+      <button type="button" class="btn-close" @click="showSuccessAlert = false"></button>
+    </div>
+
+    <!-- Error Alert -->
+    <div v-if="showErrorAlert" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+      <i class="fas fa-exclamation-circle me-2"></i>
+      <strong>Error!</strong> {{ errorMessage }}
+      <button type="button" class="btn-close" @click="showErrorAlert = false"></button>
+    </div>
+
+    <!-- Header -->
     <div class="row mb-4">
-      <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-          <h2>Available Parking Lots</h2>
-          <button @click="refreshLots" class="btn btn-outline-primary" :disabled="loading">
-            <i class="fas fa-sync-alt me-2" :class="{ 'fa-spin': loading }"></i>
-            Refresh
-          </button>
-        </div>
+      <div class="col">
+        <h2 class="h3 mb-0">
+          <i class="fas fa-car me-2 text-primary"></i>
+          Available Parking Lots
+        </h2>
+        <p class="text-muted mb-0">Find and reserve a parking spot</p>
+      </div>
+      <div class="col-auto">
+        <button @click="refreshLots" class="btn btn-outline-primary" :disabled="loading">
+          <i class="fas fa-sync-alt me-2" :class="{ 'fa-spin': loading }"></i>
+          Refresh
+        </button>
       </div>
     </div>
 
@@ -221,7 +239,11 @@ export default {
       reservationForm: {
         vehicleNumber: '',
         remarks: ''
-      }
+      },
+      showSuccessAlert: false,
+      showErrorAlert: false,
+      successMessage: '',
+      errorMessage: ''
     }
   },
   computed: {
@@ -258,8 +280,7 @@ export default {
     await this.loadParkingLots()
   },
   methods: {
-    ...mapActions('parking', ['fetchParkingLots']),
-    ...mapActions('reservations', ['createReservation']),
+    ...mapActions('parking', ['fetchParkingLots', 'createReservation']),
     
     async loadParkingLots() {
       this.loading = true
@@ -267,7 +288,7 @@ export default {
         this.parkingLots = await this.fetchParkingLots()
       } catch (error) {
         console.error('Error loading parking lots:', error)
-        this.$toast?.error('Failed to load parking lots')
+        this.showError('Failed to load parking lots')
       } finally {
         this.loading = false
       }
@@ -275,6 +296,26 @@ export default {
     
     async refreshLots() {
       await this.loadParkingLots()
+    },
+    
+    showSuccess(message) {
+      this.successMessage = message
+      this.showSuccessAlert = true
+      this.showErrorAlert = false
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        this.showSuccessAlert = false
+      }, 5000)
+    },
+    
+    showError(message) {
+      this.errorMessage = message
+      this.showErrorAlert = true
+      this.showSuccessAlert = false
+      // Auto-hide after 8 seconds
+      setTimeout(() => {
+        this.showErrorAlert = false
+      }, 8000)
     },
     
     getOccupancyPercentage(lot) {
@@ -296,7 +337,7 @@ export default {
     
     async confirmReservation() {
       if (!this.reservationForm.vehicleNumber.trim()) {
-        this.$toast?.error('Please enter vehicle number')
+        this.showError('Please enter vehicle number')
         return
       }
       
@@ -304,8 +345,8 @@ export default {
       
       try {
         const reservationData = {
-          lot_id: this.selectedLot.id,
-          vehicle_number: this.reservationForm.vehicleNumber.trim(),
+          lotId: this.selectedLot.id,
+          vehicleNumber: this.reservationForm.vehicleNumber.trim(),
           remarks: this.reservationForm.remarks.trim() || null
         }
         
@@ -318,14 +359,17 @@ export default {
         // Refresh lots to update availability
         await this.loadParkingLots()
         
-        this.$toast?.success('Parking spot reserved successfully!')
+        // Show success message
+        this.showSuccess(`Parking spot reserved successfully at ${this.selectedLot.prime_location_name}!`)
         
-        // Redirect to reservations page
-        this.$router.push('/reservations')
+        // Redirect to reservations page after showing success message
+        setTimeout(() => {
+          this.$router.push('/reservations')
+        }, 2000)
         
       } catch (error) {
         console.error('Error creating reservation:', error)
-        this.$toast?.error(error.response?.data?.message || 'Failed to reserve parking spot')
+        this.showError(error.response?.data?.message || 'Failed to reserve parking spot')
       } finally {
         this.reserving = null
       }

@@ -19,6 +19,8 @@ from datetime import timedelta
 from models import db
 from api.auth import auth_bp
 from api.parking import parking_bp
+from api.user import user_bp
+from api.admin import admin_bp
 
 
 def create_app():
@@ -26,7 +28,10 @@ def create_app():
     app = Flask(__name__)
 
     # Basic configuration
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///parking_system.db"
+    db_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "instance", "parking_system.db"
+    )
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SECRET_KEY"] = "your-secret-key-here"
 
@@ -42,6 +47,8 @@ def create_app():
     # Register blueprints
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(parking_bp, url_prefix="/api/parking")
+    app.register_blueprint(user_bp, url_prefix="/api/user")
+    app.register_blueprint(admin_bp, url_prefix="/api/admin")
 
     @app.route("/")
     def index():
