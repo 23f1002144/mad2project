@@ -13,47 +13,6 @@
             
             <div class="card-body p-4">
               <form @submit.prevent="handleLogin">
-                <!-- User Type Selection -->
-                <div class="mb-4">
-                  <label class="form-label fw-bold">Login As:</label>
-                  <div class="row g-2">
-                    <div class="col-6">
-                      <input 
-                        type="radio" 
-                        id="user" 
-                        value="user" 
-                        v-model="userType" 
-                        class="btn-check"
-                      >
-                      <label 
-                        for="user" 
-                        class="btn btn-outline-primary w-100"
-                        :class="{ 'active': userType === 'user' }"
-                      >
-                        <i class="fas fa-user me-2"></i>
-                        User
-                      </label>
-                    </div>
-                    <div class="col-6">
-                      <input 
-                        type="radio" 
-                        id="admin" 
-                        value="admin" 
-                        v-model="userType" 
-                        class="btn-check"
-                      >
-                      <label 
-                        for="admin" 
-                        class="btn btn-outline-danger w-100"
-                        :class="{ 'active': userType === 'admin' }"
-                      >
-                        <i class="fas fa-user-shield me-2"></i>
-                        Admin
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
                 <!-- Username Field -->
                 <div class="mb-3">
                   <label for="username" class="form-label">
@@ -132,7 +91,7 @@
                       <small class="d-block">
                         <strong>User:</strong><br>
                         Username: john_doe<br>
-                        Password: password123
+                        Password: user123
                       </small>
                     </div>
                   </div>
@@ -184,7 +143,6 @@ export default {
     return {
       username: '',
       password: '',
-      userType: 'user',
       showPassword: false
     }
   },
@@ -204,14 +162,13 @@ export default {
       if (!this.isFormValid) return
       
       try {
-        await this.login({
+        const result = await this.login({
           username: this.username.trim(),
-          password: this.password,
-          userType: this.userType
+          password: this.password
         })
         
-        // Redirect to appropriate dashboard
-        const redirectPath = this.userType === 'admin' ? '/admin/dashboard' : '/dashboard'
+        // Redirect based on user type returned from server
+        const redirectPath = result.user_type === 'admin' ? '/admin/dashboard' : '/dashboard'
         this.$router.push(redirectPath)
         
       } catch (error) {
@@ -222,13 +179,11 @@ export default {
     fillAdminCredentials() {
       this.username = 'admin'
       this.password = 'admin123'
-      this.userType = 'admin'
     },
     
     fillUserCredentials() {
       this.username = 'john_doe'
-      this.password = 'password123'
-      this.userType = 'user'
+      this.password = 'user123'
     }
   },
   

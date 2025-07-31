@@ -53,6 +53,13 @@
                 Register
               </router-link>
             </li>
+            <!-- Direct Logout Button for easier access -->
+            <li class="nav-item" v-if="isAuthenticated">
+              <a class="nav-link btn btn-outline-light btn-sm ms-2" href="#" @click="logout" style="border-radius: 20px;">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+              </a>
+            </li>
             <li class="nav-item dropdown" v-if="isAuthenticated">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                 <i class="fas fa-user"></i>

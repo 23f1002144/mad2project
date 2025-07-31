@@ -20,8 +20,8 @@ app.use(router)
 
 // Global error handler
 app.config.errorHandler = (error, instance, info) => {
-  console.error('Global error:', error)
-  console.error('Component info:', info)
+    console.error('Global error:', error)
+    console.error('Component info:', info)
 }
 
 app.mount('#app')
