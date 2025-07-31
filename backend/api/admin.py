@@ -290,6 +290,61 @@ def get_parking_spots(lot_id):
         return jsonify({"error": str(e)}), 500
 
 
+@admin_bp.route("/users/<int:user_id>", methods=["PUT"])
+@jwt_required()
+@admin_required
+def update_user_status(user_id):
+    """Update user status (activate/deactivate)"""
+    try:
+        user = User.query.get_or_404(user_id)
+        data = request.get_json()
+
+        # Update user status
+        if "is_active" in data:
+            user.is_active = data["is_active"]
+            user.updated_at = datetime.utcnow()
+
+        db.session.commit()
+
+        return (
+            jsonify(
+                {"message": "User status updated successfully", "user": user.to_dict()}
+            ),
+            200,
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+@admin_bp.route("/users/<int:user_id>/reservations", methods=["GET"])
+@jwt_required()
+@admin_required
+def get_user_reservations(user_id):
+    """Get all reservations for a specific user"""
+    try:
+        user = User.query.get_or_404(user_id)
+        reservations = (
+            Reservation.query.filter_by(user_id=user_id)
+            .order_by(Reservation.created_at.desc())
+            .all()
+        )
+
+        return (
+            jsonify(
+                {
+                    "user": user.to_dict(),
+                    "reservations": [r.to_dict() for r in reservations],
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @admin_bp.route("/reservations", methods=["GET"])
 @jwt_required()
 @admin_required

@@ -1,5 +1,15 @@
 <template>
   <div class="container-fluid mt-4">
+    <!-- Alert Messages -->
+    <div v-if="$store.state.alert.message" class="row mb-4">
+      <div class="col-12">
+        <div :class="`alert alert-${$store.state.alert.type} alert-dismissible fade show`" role="alert">
+          {{ $store.state.alert.message }}
+          <button type="button" class="btn-close" @click="$store.dispatch('clearAlert')"></button>
+        </div>
+      </div>
+    </div>
+
     <!-- Page Header -->
     <div class="row mb-4">
       <div class="col-12">
@@ -442,7 +452,7 @@ export default {
         this.calculateStats()
       } catch (error) {
         console.error('Error loading users:', error)
-        this.$toast?.error('Failed to load users')
+        // Error alert is handled by the store action
       } finally {
         this.loading = false
       }
@@ -501,11 +511,9 @@ export default {
           this.selectedUser = this.users.find(u => u.id === user.id)
         }
         
-        this.$toast?.success(`User ${user.is_active ? 'deactivated' : 'activated'} successfully!`)
-        
       } catch (error) {
         console.error('Error toggling user status:', error)
-        this.$toast?.error('Failed to update user status')
+        // Error alert is handled by the store action
       } finally {
         this.actionLoading = null
       }
